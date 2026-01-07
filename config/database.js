@@ -1,23 +1,19 @@
 const { Sequelize } = require("sequelize");
 
-const sequelize = new Sequelize("epps", "postgres", "S3nyumpag1h4ri",
+const sequelize = new Sequelize("owl", "userview", "!userview",
   {
-    host: "103.174.114.117",
-    // host: "localhost",
-    dialect: "postgres",
+    host: "103.146.203.121",
+    dialect: "mysql",
     logging: console.log,
   }
 );
 
-try {
-  sequelize.authenticate();
-  sequelize.sync(
-    {
-      alter: true
-    }
-  );
-  console.log("Connection has been established successfully.");
-} catch (error) {
-  console.error("Unable to connect to the database:", error);
-}
+sequelize.authenticate()
+  .then(() => {
+    console.log("Connection has been established successfully.");
+  })
+  .catch(err => {
+    console.error("Unable to connect to the database:", err);
+  });
+
 module.exports = sequelize;
