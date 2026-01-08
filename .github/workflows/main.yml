@@ -1,0 +1,33 @@
+name: Deploy via SFTP (Idcloudhost PROD)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Upload files via SFTP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST_IDCLOUDHOST_PROD }}
+        username: ${{ secrets.SSH_USER_IDCLOUDHOST_PROD }}
+        password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
+        source: "./"
+        target: "/home/dashboardback"
+
+    - name: Restart PM2
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST_IDCLOUDHOST_PROD }}
+        username: ${{ secrets.SSH_USER_IDCLOUDHOST_PROD }}
+        password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
+        script: |
+          cd /home/dashboardback
+          pm2 restart 2
