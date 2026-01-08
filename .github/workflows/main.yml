@@ -30,4 +30,4 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
         script: |
           cd /home/dashboardback
-          pm2 restart 2
+          pm2 restart 5
