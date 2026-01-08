@@ -20,7 +20,7 @@ jobs:
         username: ${{ secrets.SSH_USER_IDCLOUDHOST_PROD }}
         password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
         source: "./"
-        target: "/home/dashboardfront"
+        target: "/home/dashboardback"
 
     - name: Restart PM2
       uses: appleboy/ssh-action@v0.1.7
@@ -29,5 +29,5 @@ jobs:
         username: ${{ secrets.SSH_USER_IDCLOUDHOST_PROD }}
         password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
         script: |
-          cd /home/dashboardfront
+          cd /home/dashboardback
           pm2 restart 5
