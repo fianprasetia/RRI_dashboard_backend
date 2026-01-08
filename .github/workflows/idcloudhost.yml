@@ -19,8 +19,8 @@ jobs:
         host: ${{ secrets.SSH_HOST_IDCLOUDHOST_PROD }}
         username: ${{ secrets.SSH_USER_IDCLOUDHOST_PROD }}
         password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
-        source: "./"
-        target: "/home/dashboardback"
+        source: ./
+        target: ./
 
     - name: Restart PM2
       uses: appleboy/ssh-action@v0.1.7
@@ -29,5 +29,5 @@ jobs:
         username: ${{ secrets.SSH_USER_IDCLOUDHOST_PROD }}
         password: ${{ secrets.SSH_PASSWORD_IDCLOUDHOST_PROD }}
         script: |
-          cd /home/dashboardback
-          pm2 restart 5
+          cd ./
+          pm2 restart 0
