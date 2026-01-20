@@ -29,6 +29,7 @@ controller.selectLogin = async function (req, res) {
             const [rows] = await koneksi.query(`
             SELECT *                
             FROM user
+            LEFT JOIN datakaryawan ON user.karyawanid = datakaryawan.karyawanid 
             WHERE namauser = '${username}' AND password = PASSWORD('${password}');
             `);
             return rows;
