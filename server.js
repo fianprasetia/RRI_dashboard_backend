@@ -62,7 +62,7 @@ if (cluster.isMaster) {
     ['/', require('./routes/index')],
     ['/login', require('./routes/login')],
     ['/home', require('./routes/home')],
-    ['/mll_sia', require('./routes/mll_sia')],
+    ['/mill', require('./routes/mill')],
     ['/download-test-file.bin', require('./routes/download')],
     // ['/protected-route', validateToken, (req, res) => res.json({ message: 'Access granted', user: req.user })]
 
