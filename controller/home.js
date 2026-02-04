@@ -146,8 +146,8 @@ controller.selectWeightWeekly = async function (req, res) {
         const requestData = req.body;
         const {
             language_POST: language,
-            start_date_POST:startDate,
-            end_date_POST:endDate
+            start_date_POST: startDate,
+            end_date_POST: endDate
         } = requestData;
 
         // const today = new Date().toISOString().split('T')[0];
@@ -350,7 +350,7 @@ controller.selectWeightMonthly = async function (req, res) {
         const requestData = req.body;
         const {
             language_POST: language,
-            month_POST:month
+            month_POST: month
         } = requestData;
         const startMonth = `${month}-01`
         const endMonth = `${month}-31`
@@ -412,6 +412,121 @@ controller.selectWeightMonthly = async function (req, res) {
                 total_berat: (r.total_berat ?? 0) / 1000
             }));
         }
+        function sendSuccessResponse(message, data = []) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "success",
+                // message: message,
+                data: data
+            });
+        }
+        function sendFailedResponse(message) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "failed",
+                message: message
+            });
+        }
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            res.status(200).json({
+                access: "failed",
+                message: messages[language]?.failedData,
+                data: []
+            });
+        } else {
+            res.status(404).json({
+                message: error.message
+            });
+        }
+    }
+}
+controller.selectDispatchCPOWeekly = async function (req, res) {
+    try {
+        const requestData = req.body;
+        const {
+            language_POST: language,
+            start_date_POST: startDate,
+            end_date_POST: endDate
+        } = requestData;
+
+        const selectDispatchCPOWeeklyData = await selectDispatchCPOWeekly();
+
+        sendSuccessResponse(messages[language]?.accessSuccess, selectDispatchCPOWeeklyData);
+        async function selectDispatchCPOWeekly() {
+            const [rowsSupplier] = await koneksi.query(`
+            SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih, bps, moist, dirt, dobi          
+            FROM pabrik_timbangan
+            WHERE wbcond = 'Normal' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000001'
+            GROUP BY DATE(tanggal)
+            ORDER BY tanggal DESC
+            `);
+            return rowsSupplier
+        }
+
+
+        function sendSuccessResponse(message, data = []) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "success",
+                // message: message,
+                data: data
+            });
+        }
+        function sendFailedResponse(message) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "failed",
+                message: message
+            });
+        }
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            res.status(200).json({
+                access: "failed",
+                message: messages[language]?.failedData,
+                data: []
+            });
+        } else {
+            res.status(404).json({
+                message: error.message
+            });
+        }
+    }
+}
+controller.selectContractMonthly = async function (req, res) {
+
+    try {
+        const requestData = req.body;
+        const {
+            language_POST: language,
+            month_POST: month
+        } = requestData;
+        const startMonth = `${month}-01`
+        const endMonth = `${month}-31`
+
+        const selectContractData = await selectContract();
+        sendSuccessResponse(messages[language]?.accessSuccess, selectContractData);
+        async function selectContract() {
+            const [rowsContract] = await koneksi.query(`
+                SELECT pmn_4customer.namacustomer, pmn_suratpengiriman.nodokumen, pmn_suratpengiriman.nokontrak, pmn_suratpengiriman.qty, COALESCE(SUM(pabrik_timbangan.beratbersih), 0) AS total_berat_bersih FROM pmn_suratpengiriman 
+                LEFT JOIN pabrik_timbangan ON pmn_suratpengiriman.nodokumen = pabrik_timbangan.nodo
+                LEFT JOIN pmn_4customer ON pmn_suratpengiriman.customer = pmn_4customer.kodecustomer
+                WHERE pmn_suratpengiriman.kodebarang = '400000001'
+                GROUP BY 
+                    pmn_suratpengiriman.nodokumen,
+                    pmn_suratpengiriman.nokontrak,
+                    pmn_suratpengiriman.qty,
+                    pmn_4customer.namacustomer
+                HAVING (pmn_suratpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
+                ORDER BY pmn_suratpengiriman.nodokumen DESC;
+            `);
+
+            return rowsContract;
+        }
+
+
+
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
             res.status(200).json({
