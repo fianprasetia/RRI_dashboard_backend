@@ -509,17 +509,17 @@ controller.selectContractMonthly = async function (req, res) {
         sendSuccessResponse(messages[language]?.accessSuccess, selectContractData);
         async function selectContract() {
             const [rowsContract] = await koneksi.query(`
-                SELECT pmn_4customer.namacustomer, pmn_suratpengiriman.nodokumen, pmn_suratpengiriman.nokontrak, pmn_suratpengiriman.qty, COALESCE(SUM(pabrik_timbangan.beratbersih), 0) AS total_berat_bersih FROM pmn_suratpengiriman 
-                LEFT JOIN pabrik_timbangan ON pmn_suratpengiriman.nodokumen = pabrik_timbangan.nodo
-                LEFT JOIN pmn_4customer ON pmn_suratpengiriman.customer = pmn_4customer.kodecustomer
-                WHERE pmn_suratpengiriman.kodebarang = '400000001'
+                SELECT pmn_4customer.namacustomer, pmn_suratperintahpengiriman.nodo, pmn_suratperintahpengiriman.nokontrak, pmn_suratperintahpengiriman.qty, COALESCE(SUM(pabrik_timbangan.beratbersih), 0) AS total_berat_bersih FROM pmn_suratperintahpengiriman 
+                LEFT JOIN pabrik_timbangan ON pmn_suratperintahpengiriman.nodo = pabrik_timbangan.nodo
+                LEFT JOIN pmn_4customer ON pmn_suratperintahpengiriman.supplierid = pmn_4customer.kodecustomer
+                WHERE pmn_suratperintahpengiriman.kodebarang = '400000001'
                 GROUP BY 
-                    pmn_suratpengiriman.nodokumen,
-                    pmn_suratpengiriman.nokontrak,
-                    pmn_suratpengiriman.qty,
+                    pmn_suratperintahpengiriman.nodo,
+                    pmn_suratperintahpengiriman.nokontrak,
+                    pmn_suratperintahpengiriman.qty,
                     pmn_4customer.namacustomer
-                HAVING (pmn_suratpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
-                ORDER BY pmn_suratpengiriman.nodokumen DESC;
+                HAVING (pmn_suratperintahpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
+                ORDER BY pmn_suratperintahpengiriman.nodo DESC;
             `);
 
             return rowsContract;
