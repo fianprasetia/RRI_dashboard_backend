@@ -519,7 +519,7 @@ controller.selectContractMonthly = async function (req, res) {
                     pmn_suratperintahpengiriman.qty,
                     pmn_4customer.namacustomer
                 HAVING (pmn_suratperintahpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
-                ORDER BY pmn_suratperintahpengiriman.nodo DESC;
+                ORDER BY pmn_suratperintahpengiriman.nodo ASC;
             `);
 
             return rowsContract;
