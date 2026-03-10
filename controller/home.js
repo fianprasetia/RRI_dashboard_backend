@@ -556,4 +556,58 @@ controller.selectContractMonthly = async function (req, res) {
         }
     }
 }
+controller.selectProductionMillDaily = async function (req, res) {
+    try {
+        const requestData = req.body;
+        const {
+            language_POST: language,
+            date_POST: date
+        } = requestData;
+
+        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const result = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const startMonth = `${result}-01`
+
+        const selectProdutionMillData = await selectProdutionMill()
+
+        sendSuccessResponse(messages[language]?.accessSuccess, selectProdutionMillData);
+
+        async function selectProdutionMill() {
+            const [rowsSupplier] = await koneksi.query(`
+            SELECT sisatbskemarinnetto, tbsmasuknetto, tbsdiolahnetto, oer, oerpk
+            FROM pabrik_produksi
+            WHERE tanggal LIKE '${date}%'
+            `);
+            return rowsSupplier
+        }
+        function sendSuccessResponse(message, data = []) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "success",
+                // message: message,
+                data: data
+            });
+        }
+        function sendFailedResponse(message) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "failed",
+                message: message
+            });
+        }
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            res.status(200).json({
+                access: "failed",
+                message: messages[language]?.failedData,
+                data: []
+            });
+        } else {
+            res.status(404).json({
+                message: error.message
+            });
+        }
+    }
+}
 module.exports = controller;
