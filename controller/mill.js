@@ -41,7 +41,7 @@ controller.selectWeight = async function (req, res) {
         ];
         combinedData.sort((a, b) => {
             if (a.tanggal === b.tanggal) {
-                return a.nama.localeCompare(b.nama); // optional
+                return a.nama.localeCompare(b.nama); 
             }
             return new Date(b.tanggal) - new Date(a.tanggal);
         });

@@ -7,5 +7,6 @@ router.post("/weekly", controller.home.selectWeightWeekly);
 router.post("/monthly", controller.home.selectWeightMonthly);
 router.post("/dispatchcpoweekly", controller.home.selectDispatchCPOWeekly);
 router.post("/contractMonthly", controller.home.selectContractMonthly);
+router.post("/productionmill", controller.home.selectProductionMillDaily);
 
 module.exports = router;
