@@ -512,14 +512,14 @@ controller.selectContractMonthly = async function (req, res) {
                 SELECT pmn_4customer.namacustomer, pmn_suratperintahpengiriman.nodo, pmn_suratperintahpengiriman.nokontrak, pmn_suratperintahpengiriman.qty, COALESCE(SUM(pabrik_timbangan.beratbersih), 0) AS total_berat_bersih FROM pmn_suratperintahpengiriman 
                 LEFT JOIN pabrik_timbangan ON pmn_suratperintahpengiriman.nodo = pabrik_timbangan.nodo
                 LEFT JOIN pmn_4customer ON pmn_suratperintahpengiriman.supplierid = pmn_4customer.kodecustomer
-                WHERE pmn_suratperintahpengiriman.kodebarang = '400000001'
+                WHERE pmn_suratperintahpengiriman.kodebarang IN ('400000001','400000002')
                 GROUP BY 
                     pmn_suratperintahpengiriman.nodo,
                     pmn_suratperintahpengiriman.nokontrak,
                     pmn_suratperintahpengiriman.qty,
                     pmn_4customer.namacustomer
                 HAVING (pmn_suratperintahpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
-                ORDER BY pmn_suratperintahpengiriman.nodo ASC;
+                ORDER BY pmn_suratperintahpengiriman.tanggaldo ASC, pmn_suratperintahpengiriman.nodo ASC;
             `);
 
             return rowsContract;
