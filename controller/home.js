@@ -521,12 +521,8 @@ controller.selectContractMonthly = async function (req, res) {
                 HAVING (pmn_suratperintahpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
                 ORDER BY pmn_suratperintahpengiriman.tanggaldo ASC, pmn_suratperintahpengiriman.nodo ASC;
             `);
-
             return rowsContract;
         }
-
-
-
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
             res.status(200).json({
@@ -580,6 +576,108 @@ controller.selectProductionMillDaily = async function (req, res) {
             WHERE tanggal LIKE '${date}%'
             `);
             return rowsSupplier
+        }
+        function sendSuccessResponse(message, data = []) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "success",
+                // message: message,
+                data: data
+            });
+        }
+        function sendFailedResponse(message) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "failed",
+                message: message
+            });
+        }
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            res.status(200).json({
+                access: "failed",
+                message: messages[language]?.failedData,
+                data: []
+            });
+        } else {
+            res.status(404).json({
+                message: error.message
+            });
+        }
+    }
+}
+controller.selectCPOContractMonthly = async function (req, res) {
+
+    try {
+        const requestData = req.body;
+        const {
+            language_POST: language,
+            month_POST: month
+        } = requestData;
+
+        const selectCPOContractData = await selectCPOContract();
+
+        sendSuccessResponse(messages[language]?.accessSuccess, selectCPOContractData);
+
+        async function selectCPOContract() {
+            const [rowsContract] = await koneksi.query(`
+                SELECT DISTINCT pmn_kontrakjual.nokontrak, pmn_kontrakjual.hargasatuan, pmn_suratperintahpengiriman.kuantitas FROM pmn_kontrakjual 
+                LEFT JOIN pmn_suratperintahpengiriman ON pmn_kontrakjual.nokontrak = pmn_suratperintahpengiriman.nokontrak
+                WHERE tanggalkontrak LIKE '${month}%' AND pmn_kontrakjual.kodebarang = '400000001'
+                ORDER BY pmn_suratperintahpengiriman.tanggaldo ASC, pmn_suratperintahpengiriman.nodo ASC;
+            `);
+            return rowsContract;
+        }
+        function sendSuccessResponse(message, data = []) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "success",
+                // message: message,
+                data: data
+            });
+        }
+        function sendFailedResponse(message) {
+            if (res.headersSent) return;
+            res.status(200).json({
+                access: "failed",
+                message: message
+            });
+        }
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            res.status(200).json({
+                access: "failed",
+                message: messages[language]?.failedData,
+                data: []
+            });
+        } else {
+            res.status(404).json({
+                message: error.message
+            });
+        }
+    }
+}
+controller.selectPKContractMonthly = async function (req, res) {
+
+    try {
+        const requestData = req.body;
+        const {
+            language_POST: language,
+            month_POST: month
+        } = requestData;
+
+        const selectCPOContractData = await selectCPOContract();
+
+        sendSuccessResponse(messages[language]?.accessSuccess, selectCPOContractData);
+
+        async function selectCPOContract() {
+            const [rowsContract] = await koneksi.query(`
+                SELECT DISTINCT pmn_kontrakjual.nokontrak, pmn_kontrakjual.hargasatuan, pmn_suratperintahpengiriman.kuantitas FROM pmn_kontrakjual 
+                LEFT JOIN pmn_suratperintahpengiriman ON pmn_kontrakjual.nokontrak = pmn_suratperintahpengiriman.nokontrak
+                WHERE tanggalkontrak LIKE '${month}%' AND pmn_kontrakjual.kodebarang = '400000002'
+                ORDER BY pmn_suratperintahpengiriman.tanggaldo ASC, pmn_suratperintahpengiriman.nodo ASC;
+            `);
+            return rowsContract;
         }
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
