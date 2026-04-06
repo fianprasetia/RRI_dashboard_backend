@@ -563,11 +563,17 @@ controller.selectProductionMillDaily = async function (req, res) {
         const today = new Date().toISOString().split('T')[0];
         const now = new Date();
         const result = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const startMonth = `${result}-01`
+        now.setDate(now.getDate() - 1);
+        const resultStock = now.toISOString().split('T')[0];
 
         const selectProdutionMillData = await selectProdutionMill()
+        const selectStockData = await selectStock()
+        var data = {
+            dataProduction: selectProdutionMillData,
+            dataStock: selectStockData,
+        }
 
-        sendSuccessResponse(messages[language]?.accessSuccess, selectProdutionMillData);
+        sendSuccessResponse(messages[language]?.accessSuccess, data);
 
         async function selectProdutionMill() {
             const [rowsSupplier] = await koneksi.query(`
@@ -576,6 +582,14 @@ controller.selectProductionMillDaily = async function (req, res) {
             WHERE tanggal LIKE '${date}%'
             `);
             return rowsSupplier
+        }
+        async function selectStock() {
+            const [rowsStock] = await koneksi.query(`
+            SELECT kuantitas
+            FROM pabrik_masukkeluartangki
+            WHERE kodetangki  =  'ST01' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
+            `);
+            return rowsStock
         }
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
