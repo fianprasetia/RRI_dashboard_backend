@@ -453,6 +453,7 @@ controller.selectDispatchCPOWeekly = async function (req, res) {
         const selectDispatchCPOWeeklyData = await selectDispatchCPOWeekly();
 
         sendSuccessResponse(messages[language]?.accessSuccess, selectDispatchCPOWeeklyData);
+
         async function selectDispatchCPOWeekly() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih, bps, moist, dirt, dobi          
@@ -509,16 +510,28 @@ controller.selectContractMonthly = async function (req, res) {
         sendSuccessResponse(messages[language]?.accessSuccess, selectContractData);
         async function selectContract() {
             const [rowsContract] = await koneksi.query(`
-                SELECT pmn_4customer.namacustomer, pmn_suratperintahpengiriman.nodo, pmn_suratperintahpengiriman.nokontrak, pmn_suratperintahpengiriman.qty, COALESCE(SUM(pabrik_timbangan.beratbersih), 0) AS total_berat_bersih FROM pmn_suratperintahpengiriman 
-                LEFT JOIN pabrik_timbangan ON pmn_suratperintahpengiriman.nodo = pabrik_timbangan.nodo
-                LEFT JOIN pmn_4customer ON pmn_suratperintahpengiriman.supplierid = pmn_4customer.kodecustomer
+                SELECT 
+                    pmn_4customer.namacustomer, 
+                    pmn_suratperintahpengiriman.nodo, 
+                    pmn_suratperintahpengiriman.nokontrak, 
+                    MAX(pmn_suratperintahpengiriman.qty) AS qty, 
+                    COALESCE(MAX(pabrik_timbangan.total_berat),0) AS total_berat_bersih
+                FROM pmn_suratperintahpengiriman 
+                LEFT JOIN (
+                    SELECT nodo, SUM(beratbersih) AS total_berat 
+                    FROM pabrik_timbangan 
+                    GROUP BY nodo
+                ) pabrik_timbangan 
+                    ON pmn_suratperintahpengiriman.nodo = pabrik_timbangan.nodo
+                LEFT JOIN pmn_4customer 
+                    ON pmn_suratperintahpengiriman.supplierid = pmn_4customer.kodecustomer
                 WHERE pmn_suratperintahpengiriman.kodebarang IN ('400000001','400000002')
                 GROUP BY 
+                    pmn_4customer.namacustomer,
                     pmn_suratperintahpengiriman.nodo,
-                    pmn_suratperintahpengiriman.nokontrak,
-                    pmn_suratperintahpengiriman.qty,
-                    pmn_4customer.namacustomer
-                HAVING (pmn_suratperintahpengiriman.qty - COALESCE(SUM(pabrik_timbangan.beratbersih),0)) > 0
+                    pmn_suratperintahpengiriman.nokontrak
+                HAVING 
+                    COALESCE(MAX(pabrik_timbangan.total_berat),0) < MAX(pmn_suratperintahpengiriman.qty)
                 ORDER BY pmn_suratperintahpengiriman.tanggaldo ASC, pmn_suratperintahpengiriman.nodo ASC;
             `);
             return rowsContract;
