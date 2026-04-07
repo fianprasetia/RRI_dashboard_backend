@@ -560,11 +560,10 @@ controller.selectProductionMillDaily = async function (req, res) {
             date_POST: date
         } = requestData;
 
-        const today = new Date().toISOString().split('T')[0];
-        const now = new Date();
-        const result = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        now.setDate(now.getDate() - 1);
-        const resultStock = now.toISOString().split('T')[0];
+        const d = new Date(date);
+        d.setDate(d.getDate() - 1);
+
+        const resultStock = d.toISOString().split('T')[0];
 
         const selectProdutionMillData = await selectProdutionMill()
         const selectStockData = await selectStock()
