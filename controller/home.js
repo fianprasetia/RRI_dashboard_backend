@@ -580,9 +580,11 @@ controller.selectProductionMillDaily = async function (req, res) {
 
         const selectProdutionMillData = await selectProdutionMill()
         const selectStockData = await selectStock()
+        const selectStockTodayData = await selectStockToday()
         var data = {
             dataProduction: selectProdutionMillData,
             dataStock: selectStockData,
+            dataStockToday: selectStockTodayData,
         }
 
         sendSuccessResponse(messages[language]?.accessSuccess, data);
@@ -602,6 +604,14 @@ controller.selectProductionMillDaily = async function (req, res) {
             WHERE kodetangki  =  'ST01' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
             `);
             return rowsStock
+        }
+        async function selectStockToday() {
+            const [rowsStockToday] = await koneksi.query(`
+            SELECT kuantitas
+            FROM pabrik_masukkeluartangki
+            WHERE kodetangki  =  'ST01' AND kodeorg= 'BAFM' AND tanggal = '${date}'
+            `);
+            return rowsStockToday
         }
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
