@@ -659,8 +659,8 @@ controller.selectCPOContractMonthly = async function (req, res) {
             const [rowsContract] = await koneksi.query(`
                 SELECT DISTINCT pmn_kontrakjual.pembayaran, pmn_kontrakjual.tanggalselesai, pmn_kontrakjual.nokontrak, pmn_kontrakjual.hargasatuan, pmn_kontrakjual.kuantitaskontrak FROM pmn_kontrakjual 
                 LEFT JOIN pmn_suratperintahpengiriman ON pmn_kontrakjual.nokontrak = pmn_suratperintahpengiriman.nokontrak
-                WHERE tanggalkontrak LIKE '${month}%' AND pmn_kontrakjual.kodebarang = '400000001'
-                ORDER BY pmn_kontrakjual.tanggalkontrak ASC, pmn_suratperintahpengiriman.nodo ASC;
+                WHERE  pmn_kontrakjual.kodebarang = '400000001'
+                ORDER BY pmn_kontrakjual.tanggalkontrak DESC, pmn_suratperintahpengiriman.nodo DESC;
             `);
             return rowsContract;
         }
@@ -710,8 +710,8 @@ controller.selectPKContractMonthly = async function (req, res) {
             const [rowsContract] = await koneksi.query(`
                 SELECT DISTINCT pmn_kontrakjual.pembayaran, pmn_kontrakjual.tanggalselesai, pmn_kontrakjual.nokontrak, pmn_kontrakjual.hargasatuan, pmn_kontrakjual.kuantitaskontrak FROM pmn_kontrakjual 
                 LEFT JOIN pmn_suratperintahpengiriman ON pmn_kontrakjual.nokontrak = pmn_suratperintahpengiriman.nokontrak
-                WHERE tanggalkontrak LIKE '${month}%' AND pmn_kontrakjual.kodebarang = '400000002'
-               ORDER BY pmn_kontrakjual.tanggalkontrak ASC, pmn_suratperintahpengiriman.nodo ASC;
+                WHERE pmn_kontrakjual.kodebarang = '400000002'
+               ORDER BY pmn_kontrakjual.tanggalkontrak DESC, pmn_suratperintahpengiriman.nodo DESC;
             `);
             return rowsContract;
         }
