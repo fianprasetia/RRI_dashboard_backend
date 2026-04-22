@@ -601,17 +601,29 @@ controller.selectProductionMillDaily = async function (req, res) {
             const [rowsStock] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  =  'ST01' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
+            WHERE kodetangki  like  'ST%' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
             `);
-            return rowsStock
+            const total = rowsStock.reduce((sum, item) => {
+                return sum + Number(item.kuantitas);
+            }, 0);
+
+            return {
+                kuantitas: total
+            };
         }
         async function selectStockToday() {
             const [rowsStockToday] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  =  'ST01' AND kodeorg= 'BAFM' AND tanggal = '${date}'
+            WHERE kodetangki  like  'ST%' AND kodeorg= 'BAFM' AND tanggal = '${date}'
             `);
-            return rowsStockToday
+             const total = rowsStockToday.reduce((sum, item) => {
+                return sum + Number(item.kuantitas);
+            }, 0);
+
+            return {
+                kuantitas: total
+            };
         }
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
