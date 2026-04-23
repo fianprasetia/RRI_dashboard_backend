@@ -581,10 +581,12 @@ controller.selectProductionMillDaily = async function (req, res) {
         const selectProdutionMillData = await selectProdutionMill()
         const selectStockData = await selectStock()
         const selectStockTodayData = await selectStockToday()
+        const selectDispatchCPOData = await selectDispatchCPO()
         var data = {
             dataProduction: selectProdutionMillData,
             dataStock: selectStockData,
             dataStockToday: selectStockTodayData,
+            dataDispatchCPO: selectDispatchCPOData,
         }
 
         sendSuccessResponse(messages[language]?.accessSuccess, data);
@@ -624,6 +626,16 @@ controller.selectProductionMillDaily = async function (req, res) {
             return {
                 kuantitas: total
             };
+        }
+          async function selectDispatchCPO() {
+            const [rowsSupplier] = await koneksi.query(`
+            SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih         
+            FROM pabrik_timbangan
+            WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000001'
+            GROUP BY DATE(tanggal)
+            ORDER BY tanggal DESC
+            `);
+            return rowsSupplier
         }
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
