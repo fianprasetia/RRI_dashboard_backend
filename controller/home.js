@@ -579,14 +579,20 @@ controller.selectProductionMillDaily = async function (req, res) {
         const resultStock = d.toISOString().split('T')[0];
 
         const selectProdutionMillData = await selectProdutionMill()
-        const selectStockData = await selectStock()
-        const selectStockTodayData = await selectStockToday()
+        const selectStockCPOData = await selectStockCPO()
+        const selectStockPKData = await selectStockPK()
+        const selectStockCPOTodayData = await selectStockCPOToday()
+        const selectStockPKTodayData = await selectStockPKToday()
         const selectDispatchCPOData = await selectDispatchCPO()
+        const selectDispatchPKData = await selectDispatchPK()
         var data = {
             dataProduction: selectProdutionMillData,
-            dataStock: selectStockData,
-            dataStockToday: selectStockTodayData,
+            dataStockCPO: selectStockCPOData,
+            dataStockPK: selectStockPKData,
+            dataStockCPOToday: selectStockCPOTodayData,
+            dataStockPKToday: selectStockPKTodayData,
             dataDispatchCPO: selectDispatchCPOData,
+            dataDispatchPK: selectDispatchPKData,
         }
 
         sendSuccessResponse(messages[language]?.accessSuccess, data);
@@ -599,7 +605,7 @@ controller.selectProductionMillDaily = async function (req, res) {
             `);
             return rowsSupplier
         }
-        async function selectStock() {
+        async function selectStockCPO() {
             const [rowsStock] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
@@ -613,13 +619,37 @@ controller.selectProductionMillDaily = async function (req, res) {
                 kuantitas: total
             };
         }
-        async function selectStockToday() {
+        async function selectStockPK() {
+
+            const [rowsStock] = await koneksi.query(`
+            SELECT kernelquantity,lantai
+            FROM pabrik_masukkeluartangki
+            WHERE kodetangki  like  'KB%' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
+            `);
+            const total = rowsStock.reduce((acc, item) => {
+                acc.kernelquantity += Number(item.kernelquantity || 0);
+                acc.lantai += Number(item.lantai || 0);
+                return acc;
+            }, {
+                kernelquantity: 0,
+                lantai: 0
+            });
+            const totalStockPK = total.kernelquantity + total.lantai;
+            // const total = rowsStock.reduce((sum, item) => {
+            //     return sum + Number(item.kernelquantity);
+            // }, 0);
+
+            return {
+                kuantitas: totalStockPK
+            };
+        }
+        async function selectStockCPOToday() {
             const [rowsStockToday] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
             WHERE kodetangki  like  'ST%' AND kodeorg= 'BAFM' AND tanggal = '${date}'
             `);
-             const total = rowsStockToday.reduce((sum, item) => {
+            const total = rowsStockToday.reduce((sum, item) => {
                 return sum + Number(item.kuantitas);
             }, 0);
 
@@ -627,11 +657,41 @@ controller.selectProductionMillDaily = async function (req, res) {
                 kuantitas: total
             };
         }
-          async function selectDispatchCPO() {
+        async function selectStockPKToday() {
+            const [rowsStockToday] = await koneksi.query(`
+            SELECT kernelquantity,lantai
+            FROM pabrik_masukkeluartangki
+            WHERE kodetangki  like  'KB%' AND kodeorg= 'BAFM' AND tanggal = '${date}'
+            `);
+            const total = rowsStockToday.reduce((acc, item) => {
+                acc.kernelquantity += Number(item.kernelquantity || 0);
+                acc.lantai += Number(item.lantai || 0);
+                return acc;
+            }, {
+                kernelquantity: 0,
+                lantai: 0
+            });
+            const totalStockPK = total.kernelquantity + total.lantai;
+
+            return {
+                kuantitas: totalStockPK
+            };
+        }
+        async function selectDispatchCPO() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih         
             FROM pabrik_timbangan
             WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000001'
+            GROUP BY DATE(tanggal)
+            ORDER BY tanggal DESC
+            `);
+            return rowsSupplier
+        }
+        async function selectDispatchPK() {
+            const [rowsSupplier] = await koneksi.query(`
+            SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih         
+            FROM pabrik_timbangan
+            WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000002'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
