@@ -624,7 +624,7 @@ controller.selectProductionMillDaily = async function (req, res) {
             const [rowsStock] = await koneksi.query(`
             SELECT kernelquantity,lantai
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  like  'KB%' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
+            WHERE kodetangki  =  'KB02' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
             `);
             const total = rowsStock.reduce((acc, item) => {
                 acc.kernelquantity += Number(item.kernelquantity || 0);
@@ -634,7 +634,8 @@ controller.selectProductionMillDaily = async function (req, res) {
                 kernelquantity: 0,
                 lantai: 0
             });
-            const totalStockPK = total.kernelquantity + total.lantai;
+            // const totalStockPK = total.kernelquantity + total.lantai;
+            const totalStockPK = total.kernelquantity ;
             // const total = rowsStock.reduce((sum, item) => {
             //     return sum + Number(item.kernelquantity);
             // }, 0);
@@ -661,7 +662,7 @@ controller.selectProductionMillDaily = async function (req, res) {
             const [rowsStockToday] = await koneksi.query(`
             SELECT kernelquantity,lantai
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  like  'KB%' AND kodeorg= 'BAFM' AND tanggal = '${date}'
+            WHERE kodetangki  =  'KB02' AND kodeorg= 'BAFM' AND tanggal = '${date}'
             `);
             const total = rowsStockToday.reduce((acc, item) => {
                 acc.kernelquantity += Number(item.kernelquantity || 0);
@@ -671,7 +672,8 @@ controller.selectProductionMillDaily = async function (req, res) {
                 kernelquantity: 0,
                 lantai: 0
             });
-            const totalStockPK = total.kernelquantity + total.lantai;
+            // const totalStockPK = total.kernelquantity + total.lantai;
+            const totalStockPK = total.kernelquantity ;
 
             return {
                 kuantitas: totalStockPK
