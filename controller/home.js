@@ -148,9 +148,10 @@ controller.selectWeightDaily = async function (req, res) {
             nama,
             kategori
 
-      ORDER BY 
+        ORDER BY 
             FIELD(kategori, 'INTI', 'PLASMA', 'EXTERNAL'),
-            total_berat_bersih DESC,nama
+            nama ASC,
+            SUM(beratbersih) DESC
     `);
 
             return rows;
