@@ -23,12 +23,14 @@ controller.selectWeightDaily = async function (req, res) {
         const selectWeightDayIntiData = await selectWeightDayInti()
         const selectWeightDayPlasmaData = await selectWeightDayPlasma()
         const selectWeightDayExternalData = await selectWeightDayExternal()
+        const selectWeightDayDetailData = await selectWeightDayDetail()
 
         var data = {
             dataDayAll: selectWeightDayAllData,
             dataDayInti: selectWeightDayIntiData,
             dataDayPlasma: selectWeightDayPlasmaData,
             dataDayExternal: selectWeightDayExternalData,
+            dataDayDetail: selectWeightDayDetailData,
         }
         sendSuccessResponse(messages[language]?.accessSuccess, data);
 
@@ -66,7 +68,7 @@ controller.selectWeightDaily = async function (req, res) {
             const [rowsExternal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '40%' AND kodebarang='400000003' AND tanggal LIKE '${date}%'
+            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND tanggal LIKE '${date}%'
             `);
             return rowsExternal.map(r => ({
                 total_berat: (r.total_berat ?? 0) / 1000
@@ -106,11 +108,52 @@ controller.selectWeightDaily = async function (req, res) {
             const [rowsExternal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '40%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${today} 23:59:59'
+            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${today} 23:59:59'
             `);
             return rowsExternal.map(r => ({
                 total_berat: (r.total_berat ?? 0) / 1000
             }));
+        }
+        async function selectWeightDayDetail() {
+            const [rows] = await koneksi.query(`
+        SELECT 
+            DATE(tanggal) AS tanggal,
+
+            CASE
+                WHEN intex = 1 THEN organisasi.namaorganisasi
+                ELSE log_5supplier.namasupplier
+            END AS nama,
+
+            CASE
+                WHEN intex = 1 THEN 'INTI'
+                WHEN nospb LIKE '50%' THEN 'PLASMA'
+                WHEN nospb LIKE '4%' THEN 'EXTERNAL'
+            END AS kategori,
+
+            SUM(beratbersih)/1000 AS total_berat_bersih
+
+        FROM pabrik_timbangan
+
+        LEFT JOIN organisasi 
+            ON pabrik_timbangan.kodeorg = organisasi.kodeorganisasi 
+
+        LEFT JOIN log_5supplier 
+            ON pabrik_timbangan.kodesupplier = log_5supplier.supplierid 
+
+        WHERE tanggal LIKE '${date}%'
+        AND kodebarang='400000003'
+
+        GROUP BY 
+            DATE(tanggal),
+            nama,
+            kategori
+
+      ORDER BY 
+            FIELD(kategori, 'INTI', 'PLASMA', 'EXTERNAL'),
+            total_berat_bersih DESC,nama
+    `);
+
+            return rows;
         }
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
@@ -298,7 +341,7 @@ controller.selectWeightWeekly = async function (req, res) {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih           
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '40%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003'
+            WHERE intex = 0 AND nospb LIKE '4%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
@@ -406,7 +449,7 @@ controller.selectWeightMonthly = async function (req, res) {
             const [rowsExternal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '40%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
+            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
             `);
             return rowsExternal.map(r => ({
                 total_berat: (r.total_berat ?? 0) / 1000
@@ -620,7 +663,6 @@ controller.selectProductionMillDaily = async function (req, res) {
             };
         }
         async function selectStockPK() {
-
             const [rowsStock] = await koneksi.query(`
             SELECT kernelquantity,lantai
             FROM pabrik_masukkeluartangki
@@ -635,7 +677,7 @@ controller.selectProductionMillDaily = async function (req, res) {
                 lantai: 0
             });
             // const totalStockPK = total.kernelquantity + total.lantai;
-            const totalStockPK = total.kernelquantity ;
+            const totalStockPK = total.kernelquantity;
             // const total = rowsStock.reduce((sum, item) => {
             //     return sum + Number(item.kernelquantity);
             // }, 0);
@@ -673,7 +715,7 @@ controller.selectProductionMillDaily = async function (req, res) {
                 lantai: 0
             });
             // const totalStockPK = total.kernelquantity + total.lantai;
-            const totalStockPK = total.kernelquantity ;
+            const totalStockPK = total.kernelquantity;
 
             return {
                 kuantitas: totalStockPK
@@ -699,6 +741,7 @@ controller.selectProductionMillDaily = async function (req, res) {
             `);
             return rowsSupplier
         }
+
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
             res.status(200).json({
