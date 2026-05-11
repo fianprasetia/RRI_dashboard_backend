@@ -622,6 +622,8 @@ controller.selectProductionMillDaily = async function (req, res) {
 
         const resultStock = d.toISOString().split('T')[0];
 
+        const selectMasukTodayAllData = await selectMasukTodayAll()
+        const selectStockTBSRestanData = await selectStockTBSRestan()
         const selectProdutionMillData = await selectProdutionMill()
         const selectStockCPOData = await selectStockCPO()
         const selectStockPKData = await selectStockPK()
@@ -630,6 +632,8 @@ controller.selectProductionMillDaily = async function (req, res) {
         const selectDispatchCPOData = await selectDispatchCPO()
         const selectDispatchPKData = await selectDispatchPK()
         var data = {
+            dataTBSRestan: selectStockTBSRestanData,
+            dataTBSToday: selectMasukTodayAllData,
             dataProduction: selectProdutionMillData,
             dataStockCPO: selectStockCPOData,
             dataStockPK: selectStockPKData,
@@ -641,6 +645,22 @@ controller.selectProductionMillDaily = async function (req, res) {
 
         sendSuccessResponse(messages[language]?.accessSuccess, data);
 
+        async function selectMasukTodayAll() {
+            const [rowsTotal] = await koneksi.query(`
+            SELECT SUM(beratbersih) AS total_berat               
+            FROM pabrik_timbangan
+            WHERE tanggal LIKE '${date}%' AND kodebarang='400000003'
+            `);
+            return rowsTotal
+        }
+        async function selectStockTBSRestan() {
+            const [rowsSupplier] = await koneksi.query(`
+            SELECT sisahariininetto
+            FROM pabrik_produksi
+            WHERE tanggal LIKE '${resultStock}%'
+            `);
+            return rowsSupplier
+        }
         async function selectProdutionMill() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT sisatbskemarinnetto, tbsmasuknetto, tbsdiolahnetto, oer, oerpk
