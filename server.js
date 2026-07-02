@@ -63,6 +63,7 @@ if (cluster.isMaster) {
     ['/login', require('./routes/login')],
     ['/home', require('./routes/home')],
     ['/mill', require('./routes/mill')],
+    ['/productivitiesreport', require('./routes/productivities_report')],
     ['/download-test-file.bin', require('./routes/download')],
     // ['/protected-route', validateToken, (req, res) => res.json({ message: 'Access granted', user: req.user })]
 
