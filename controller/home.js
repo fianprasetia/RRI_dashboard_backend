@@ -58,7 +58,7 @@ controller.selectWeightDaily = async function (req, res) {
             const [rowsPlasma] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '50%' AND kodebarang='400000003' AND tanggal LIKE '${date}%'
+            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal LIKE '${date}%'
             `);
             return rowsPlasma.map(r => ({
                 total_berat: (r.total_berat ?? 0) / 1000
@@ -564,6 +564,7 @@ controller.selectContractMonthly = async function (req, res) {
                 LEFT JOIN (
                     SELECT nodo, SUM(beratbersih) AS total_berat 
                     FROM pabrik_timbangan 
+                    WHERE wbcond = 'Normal'
                     GROUP BY nodo
                 ) pabrik_timbangan 
                     ON pmn_suratperintahpengiriman.nodo = pabrik_timbangan.nodo
