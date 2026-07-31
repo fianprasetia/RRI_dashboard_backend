@@ -418,13 +418,14 @@ controller.selectWeightMonthly = async function (req, res) {
 
         async function selectWeightMonthAll() {
             const [rowsTotal] = await koneksi.query(`
-       SELECT
-    ROUND(SUM(beratbersih) / 1000, 2) AS total_berat
-FROM pabrik_timbangan
-WHERE tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
-  AND kodebarang = '400000003';
+            SELECT SUM(beratbersih) AS total_berat
+            FROM pabrik_timbangan
+            WHERE tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
+            AND kodebarang = '400000003';
             `);
-            return rowsTotal
+            return rowsTotal.map(r => ({
+                total_berat: (r.total_berat ?? 0) / 1000
+            }));
         }
         async function selectWeightMonthInti() {
             const [rowsInti] = await koneksi.query(`
@@ -440,7 +441,7 @@ WHERE tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
             const [rowsPlasma] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '50%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
+            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
             `);
             return rowsPlasma.map(r => ({
                 total_berat: (r.total_berat ?? 0) / 1000
