@@ -314,7 +314,7 @@ controller.selectProductivitiesReport2 = async function (req, res) {
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=12 THEN beratbersih ELSE 0 END) / 1000, 2) AS f,
                 ROUND(SUM(beratbersih) / 1000, 2) AS Total
             FROM pabrik_timbangan
-             WHERE intex = 0 AND nospb LIKE '50%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
+             WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
             return rowsTotal
         }
