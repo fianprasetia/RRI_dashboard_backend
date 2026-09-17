@@ -665,7 +665,7 @@ controller.selectProductionMillDaily = async function (req, res) {
         }
         async function selectProdutionMill() {
             const [rowsSupplier] = await koneksi.query(`
-            SELECT sisatbskemarinnetto, tbsmasuknetto, tbsdiolahnetto, oer, oerpk
+            SELECT sisatbskemarinnetto, tbsmasuknetto, tbsdiolahnetto, oer, oerpk, ffa, kadarair, kadarkotoran, kadarairpk, kadarkotoranpk
             FROM pabrik_produksi
             WHERE tanggal LIKE '${date}%'
             `);
