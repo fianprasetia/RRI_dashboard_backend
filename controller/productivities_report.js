@@ -1,49 +1,47 @@
-require('dotenv').config();
+require("dotenv").config();
 
 const koneksi = require("../config/database");
-const messages = require("./message")
-const controller = {}
-const { Op, json } = require("sequelize")
-
+const messages = require("./message");
+const controller = {};
+const { Op, json } = require("sequelize");
 
 controller.selectProductivitiesReport1 = async function (req, res) {
-    try {
-        const requestData = req.body;
-        const {
-            language_POST: language,
-            start_month_POST: startMonth,
-            end_month_POST: endMonth,
-        } = requestData;
+  try {
+    const requestData = req.body;
+    const {
+      language_POST: language,
+      start_month_POST: startMonth,
+      end_month_POST: endMonth,
+    } = requestData;
 
+    const selectTBSIntiEastData = await selectTBSIntiEast();
+    const selectTBSIntiWestData = await selectTBSIntiWest();
+    const selectTBSIntiSemeData = await selectTBSIntiSeme();
+    const selectTBSPlasmaData = await selectTBSPlasma();
+    const selectTBSExternalData = await selectTBSExternal();
+    const selectTBSProsesData = await selectTBSProses();
+    const selectCPOProductionData = await selectCPOProduction();
+    const selectDispatchCPOData = await selectDispatchCPO();
+    const selectPKProductionData = await selectPKProduction();
+    const selectPKDispatchData = await selectPKDispatch();
 
-        const selectTBSIntiEastData = await selectTBSIntiEast()
-        const selectTBSIntiWestData = await selectTBSIntiWest()
-        const selectTBSIntiSemeData = await selectTBSIntiSeme()
-        const selectTBSPlasmaData = await selectTBSPlasma()
-        const selectTBSExternalData = await selectTBSExternal()
-        const selectTBSProsesData = await selectTBSProses()
-        const selectCPOProductionData = await selectCPOProduction()
-        const selectDispatchCPOData = await selectDispatchCPO()
-        const selectPKProductionData = await selectPKProduction()
-        const selectPKDispatchData = await selectPKDispatch()
+    var data = {
+      dataTBSEast: selectTBSIntiEastData,
+      dataTBSWest: selectTBSIntiWestData,
+      dataTBSSeme: selectTBSIntiSemeData,
+      dataTBSPlasma: selectTBSPlasmaData,
+      dataTBSExternal: selectTBSExternalData,
+      dataTBSProses: selectTBSProsesData,
+      dataCPOProduction: selectCPOProductionData,
+      dataDispatchCPO: selectDispatchCPOData,
+      dataPKProduction: selectPKProductionData,
+      dataPKDispatch: selectPKDispatchData,
+    };
 
-        var data = {
-            dataTBSEast: selectTBSIntiEastData,
-            dataTBSWest: selectTBSIntiWestData,
-            dataTBSSeme: selectTBSIntiSemeData,
-            dataTBSPlasma: selectTBSPlasmaData,
-            dataTBSExternal: selectTBSExternalData,
-            dataTBSProses: selectTBSProsesData,
-            dataCPOProduction: selectCPOProductionData,
-            dataDispatchCPO: selectDispatchCPOData,
-            dataPKProduction: selectPKProductionData,
-            dataPKDispatch: selectPKDispatchData
-        }
+    sendSuccessResponse(messages[language]?.accessSuccess, data);
 
-        sendSuccessResponse(messages[language]?.accessSuccess, data);
-
-        async function selectTBSIntiEast() {
-            const [rowsTotal] = await koneksi.query(`
+    async function selectTBSIntiEast() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -55,10 +53,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_timbangan
             WHERE kodeorg = 'ESEE' AND kodebarang = '400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSIntiWest() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSIntiWest() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -70,10 +68,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_timbangan
             WHERE kodeorg = 'WSEE' AND kodebarang = '400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSIntiSeme() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSIntiSeme() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -85,10 +83,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_timbangan
             WHERE kodeorg = 'SEME' AND kodebarang = '400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSPlasma() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSPlasma() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -100,10 +98,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_timbangan
              WHERE nospb LIKE '5%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSExternal() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSExternal() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -115,10 +113,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_timbangan
              WHERE nospb LIKE '4%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSProses() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSProses() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 1 THEN tbsdiolahnetto ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 2 THEN tbsdiolahnetto ELSE 0 END) / 1000, 2) AS b,
@@ -130,10 +128,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_produksi
             WHERE tanggal BETWEEN '${startMonth}' AND '${endMonth}';
             `);
-            return rowsTotal
-        }
-        async function selectCPOProduction() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectCPOProduction() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 1 THEN oer ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 2 THEN oer ELSE 0 END) / 1000, 2) AS b,
@@ -145,10 +143,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_produksi
             WHERE tanggal BETWEEN '${startMonth}' AND '${endMonth}';
             `);
-            return rowsTotal
-        }
-        async function selectDispatchCPO() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectDispatchCPO() {
+      const [rowsTotal] = await koneksi.query(`
            SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -159,10 +157,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
                 ROUND(SUM(beratbersih) / 1000, 2) AS Total
             FROM pabrik_timbangan
             WHERE wbcond = 'Normal' AND kodebarang = '400000001' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';`);
-            return rowsTotal
-        }
-     async function selectPKProduction() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectPKProduction() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 1 THEN oerpk ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 2 THEN oerpk ELSE 0 END) / 1000, 2) AS b,
@@ -174,10 +172,10 @@ controller.selectProductivitiesReport1 = async function (req, res) {
             FROM pabrik_produksi
             WHERE tanggal BETWEEN '${startMonth}' AND '${endMonth}';
             `);
-            return rowsTotal
-        }
+      return rowsTotal;
+    }
     async function selectPKDispatch() {
-            const [rowsTotal] = await koneksi.query(`
+      const [rowsTotal] = await koneksi.query(`
            SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 1 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 2 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -188,78 +186,75 @@ controller.selectProductivitiesReport1 = async function (req, res) {
                 ROUND(SUM(beratbersih) / 1000, 2) AS Total
             FROM pabrik_timbangan
             WHERE wbcond = 'Normal' AND kodebarang = '400000002' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';`);
-            return rowsTotal
-        }
-
-
-    
-        function sendSuccessResponse(message, data = []) {
-            if (res.headersSent) return;
-            res.status(200).json({
-                access: "success",
-                // message: message,
-                data: data
-            });
-        }
-        function sendFailedResponse(message) {
-            if (res.headersSent) return;
-            res.status(200).json({
-                access: "failed",
-                message: message
-            });
-        }
-    } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-            res.status(200).json({
-                access: "failed",
-                message: messages[language]?.failedData,
-                data: []
-            });
-        } else {
-            res.status(404).json({
-                message: error.message
-            });
-        }
+      return rowsTotal;
     }
-}
+
+    function sendSuccessResponse(message, data = []) {
+      if (res.headersSent) return;
+      res.status(200).json({
+        access: "success",
+        // message: message,
+        data: data,
+      });
+    }
+    function sendFailedResponse(message) {
+      if (res.headersSent) return;
+      res.status(200).json({
+        access: "failed",
+        message: message,
+      });
+    }
+  } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(200).json({
+        access: "failed",
+        message: messages[language]?.failedData,
+        data: [],
+      });
+    } else {
+      res.status(404).json({
+        message: error.message,
+      });
+    }
+  }
+};
 controller.selectProductivitiesReport2 = async function (req, res) {
-    try {
-        const requestData = req.body;
-        const {
-            language_POST: language,
-            start_month_POST: startMonth,
-            end_month_POST: endMonth,
-        } = requestData;
+  try {
+    const requestData = req.body;
+    const {
+      language_POST: language,
+      start_month_POST: startMonth,
+      end_month_POST: endMonth,
+    } = requestData;
 
+    const selectTBSIntiEastData = await selectTBSIntiEast();
+    const selectTBSIntiWestData = await selectTBSIntiWest();
+    const selectTBSIntiSemeData = await selectTBSIntiSeme();
+    const selectTBSPlasmaData = await selectTBSPlasma();
+    const selectTBSExternalData = await selectTBSExternal();
+    const selectTBSProsesData = await selectTBSProses();
+    const selectCPOProductionData = await selectCPOProduction();
+    const selectDispatchCPOData = await selectDispatchCPO();
+    const selectPKProductionData = await selectPKProduction();
+    const selectPKDispatchData = await selectPKDispatch();
 
-        const selectTBSIntiEastData = await selectTBSIntiEast()
-        const selectTBSIntiWestData = await selectTBSIntiWest()
-        const selectTBSIntiSemeData = await selectTBSIntiSeme()
-        const selectTBSPlasmaData = await selectTBSPlasma()
-        const selectTBSExternalData = await selectTBSExternal()
-        const selectTBSProsesData = await selectTBSProses()
-        const selectCPOProductionData = await selectCPOProduction()
-        const selectDispatchCPOData = await selectDispatchCPO()
-        const selectPKProductionData = await selectPKProduction()
-        const selectPKDispatchData = await selectPKDispatch()
+    var data = {
+      dataTBSEast: selectTBSIntiEastData,
+      dataTBSWest: selectTBSIntiWestData,
+      dataTBSSeme: selectTBSIntiSemeData,
+      dataTBSPlasma: selectTBSPlasmaData,
+      dataTBSExternal: selectTBSExternalData,
+      dataTBSProses: selectTBSProsesData,
+      dataCPOProduction: selectCPOProductionData,
+      dataDispatchCPO: selectDispatchCPOData,
+      dataPKProduction: selectPKProductionData,
+      dataPKDispatch: selectPKDispatchData,
+    };
 
-        var data = {
-            dataTBSEast: selectTBSIntiEastData,
-            dataTBSWest: selectTBSIntiWestData,
-            dataTBSSeme: selectTBSIntiSemeData,
-            dataTBSPlasma: selectTBSPlasmaData,
-            dataTBSExternal: selectTBSExternalData,
-            dataTBSProses: selectTBSProsesData,
-            dataCPOProduction: selectCPOProductionData,
-            dataDispatchCPO: selectDispatchCPOData,
-            dataPKProduction: selectPKProductionData,
-            dataPKDispatch: selectPKDispatchData
-        }
+    sendSuccessResponse(messages[language]?.accessSuccess, data);
 
-        sendSuccessResponse(messages[language]?.accessSuccess, data);
-
-        async function selectTBSIntiEast() {
-            const [rowsTotal] = await koneksi.query(`
+    async function selectTBSIntiEast() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -271,10 +266,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_timbangan
             WHERE kodeorg = 'ESEE' AND kodebarang = '400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSIntiWest() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSIntiWest() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -286,10 +281,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_timbangan
             WHERE kodeorg = 'WSEE' AND kodebarang = '400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSIntiSeme() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSIntiSeme() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -301,10 +296,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_timbangan
             WHERE kodeorg = 'SEME' AND kodebarang = '400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSPlasma() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSPlasma() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -316,10 +311,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_timbangan
              WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSExternal() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSExternal() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal)=8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -331,10 +326,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_timbangan
              WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';
             `);
-            return rowsTotal
-        }
-        async function selectTBSProses() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectTBSProses() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 7 THEN tbsdiolahnetto ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 8 THEN tbsdiolahnetto ELSE 0 END) / 1000, 2) AS b,
@@ -346,10 +341,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_produksi
             WHERE tanggal BETWEEN '${startMonth}' AND '${endMonth}';
             `);
-            return rowsTotal
-        }
-        async function selectCPOProduction() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectCPOProduction() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 7 THEN oer ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 8 THEN oer ELSE 0 END) / 1000, 2) AS b,
@@ -361,10 +356,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_produksi
             WHERE tanggal BETWEEN '${startMonth}' AND '${endMonth}';
             `);
-            return rowsTotal
-        }
-        async function selectDispatchCPO() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectDispatchCPO() {
+      const [rowsTotal] = await koneksi.query(`
            SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -375,10 +370,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
                 ROUND(SUM(beratbersih) / 1000, 2) AS Total
             FROM pabrik_timbangan
             WHERE wbcond = 'Normal' AND kodebarang = '400000001' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';`);
-            return rowsTotal
-        }
-     async function selectPKProduction() {
-            const [rowsTotal] = await koneksi.query(`
+      return rowsTotal;
+    }
+    async function selectPKProduction() {
+      const [rowsTotal] = await koneksi.query(`
             SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 7 THEN oerpk ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 8 THEN oerpk ELSE 0 END) / 1000, 2) AS b,
@@ -390,10 +385,10 @@ controller.selectProductivitiesReport2 = async function (req, res) {
             FROM pabrik_produksi
             WHERE tanggal BETWEEN '${startMonth}' AND '${endMonth}';
             `);
-            return rowsTotal
-        }
+      return rowsTotal;
+    }
     async function selectPKDispatch() {
-            const [rowsTotal] = await koneksi.query(`
+      const [rowsTotal] = await koneksi.query(`
            SELECT
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 7 THEN beratbersih ELSE 0 END) / 1000, 2) AS a,
                 ROUND(SUM(CASE WHEN MONTH(tanggal) = 8 THEN beratbersih ELSE 0 END) / 1000, 2) AS b,
@@ -404,38 +399,36 @@ controller.selectProductivitiesReport2 = async function (req, res) {
                 ROUND(SUM(beratbersih) / 1000, 2) AS Total
             FROM pabrik_timbangan
             WHERE wbcond = 'Normal' AND kodebarang = '400000002' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59';`);
-            return rowsTotal
-        }
-
-
-    
-        function sendSuccessResponse(message, data = []) {
-            if (res.headersSent) return;
-            res.status(200).json({
-                access: "success",
-                // message: message,
-                data: data
-            });
-        }
-        function sendFailedResponse(message) {
-            if (res.headersSent) return;
-            res.status(200).json({
-                access: "failed",
-                message: message
-            });
-        }
-    } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-            res.status(200).json({
-                access: "failed",
-                message: messages[language]?.failedData,
-                data: []
-            });
-        } else {
-            res.status(404).json({
-                message: error.message
-            });
-        }
+      return rowsTotal;
     }
-}
+
+    function sendSuccessResponse(message, data = []) {
+      if (res.headersSent) return;
+      res.status(200).json({
+        access: "success",
+        // message: message,
+        data: data,
+      });
+    }
+    function sendFailedResponse(message) {
+      if (res.headersSent) return;
+      res.status(200).json({
+        access: "failed",
+        message: message,
+      });
+    }
+  } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(200).json({
+        access: "failed",
+        message: messages[language]?.failedData,
+        data: [],
+      });
+    } else {
+      res.status(404).json({
+        message: error.message,
+      });
+    }
+  }
+};
 module.exports = controller;

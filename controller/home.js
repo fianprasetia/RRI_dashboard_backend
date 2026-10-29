@@ -1,29 +1,29 @@
-require('dotenv').config();
+require("dotenv").config();
 
 const koneksi = require("../config/database");
-const messages = require("./message")
-const controller = {}
-const { Op, json } = require("sequelize")
-
+const messages = require("./message");
+const controller = {};
+const { Op, json } = require("sequelize");
 
 controller.selectWeightDaily = async function (req, res) {
     try {
         const requestData = req.body;
         const {
             language_POST: language,
-            date_POST: date
+            date_POST: date,
+            code_POST: code,
         } = requestData;
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
         const now = new Date();
-        const result = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const startMonth = `${result}-01`
+        const result = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const startMonth = `${result}-01`;
 
-        const selectWeightDayAllData = await selectWeightDayAll()
-        const selectWeightDayIntiData = await selectWeightDayInti()
-        const selectWeightDayPlasmaData = await selectWeightDayPlasma()
-        const selectWeightDayExternalData = await selectWeightDayExternal()
-        const selectWeightDayDetailData = await selectWeightDayDetail()
+        const selectWeightDayAllData = await selectWeightDayAll();
+        const selectWeightDayIntiData = await selectWeightDayInti();
+        const selectWeightDayPlasmaData = await selectWeightDayPlasma();
+        const selectWeightDayExternalData = await selectWeightDayExternal();
+        const selectWeightDayDetailData = await selectWeightDayDetail();
 
         var data = {
             dataDayAll: selectWeightDayAllData,
@@ -31,47 +31,47 @@ controller.selectWeightDaily = async function (req, res) {
             dataDayPlasma: selectWeightDayPlasmaData,
             dataDayExternal: selectWeightDayExternalData,
             dataDayDetail: selectWeightDayDetailData,
-        }
+        };
         sendSuccessResponse(messages[language]?.accessSuccess, data);
 
         async function selectWeightDayAll() {
             const [rowsTotal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE tanggal LIKE '${date}%' AND kodebarang='400000003'
+            WHERE tanggal LIKE '${date}%' AND kodebarang='400000003' AND millcode='${code}'
             `);
-            return rowsTotal.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsTotal.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightDayInti() {
             const [rowsInti] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 1 AND kodebarang='400000003' AND tanggal LIKE '${date}%'
+            WHERE intex = 1 AND kodebarang='400000003' AND tanggal LIKE '${date}%' AND millcode='${code}'
             `);
-            return rowsInti.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsInti.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightDayPlasma() {
             const [rowsPlasma] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal LIKE '${date}%'
+            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal LIKE '${date}%' AND millcode='${code}'
             `);
-            return rowsPlasma.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsPlasma.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightDayExternal() {
             const [rowsExternal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND tanggal LIKE '${date}%'
+            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND tanggal LIKE '${date}%' AND millcode='${code}'
             `);
-            return rowsExternal.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsExternal.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthAll() {
@@ -80,8 +80,8 @@ controller.selectWeightDaily = async function (req, res) {
             FROM pabrik_timbangan
             WHERE tanggal BETWEEN '${startMonth} 00:00:00' AND '${today} 23:59:59' AND kodebarang='400000003'
             `);
-            return rowsTotal.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsTotal.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthInti() {
@@ -90,8 +90,8 @@ controller.selectWeightDaily = async function (req, res) {
             FROM pabrik_timbangan
             WHERE intex = 1 AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${today} 23:59:59'
             `);
-            return rowsInti.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsInti.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthPlasma() {
@@ -100,8 +100,8 @@ controller.selectWeightDaily = async function (req, res) {
             FROM pabrik_timbangan
             WHERE intex = 0 AND nospb LIKE '50%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${today} 23:59:59'
             `);
-            return rowsPlasma.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsPlasma.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthExternal() {
@@ -110,20 +110,17 @@ controller.selectWeightDaily = async function (req, res) {
             FROM pabrik_timbangan
             WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${today} 23:59:59'
             `);
-            return rowsExternal.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsExternal.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightDayDetail() {
             const [rows] = await koneksi.query(`
-        SELECT 
-            DATE(tanggal) AS tanggal,
-
+        SELECT DATE(tanggal) AS tanggal,
             CASE
                 WHEN intex = 1 THEN organisasi.namaorganisasi
                 ELSE log_5supplier.namasupplier
             END AS nama,
-
             CASE
                 WHEN intex = 1 THEN 'INTI'
                 WHEN nospb LIKE '50%' THEN 'PLASMA'
@@ -140,8 +137,7 @@ controller.selectWeightDaily = async function (req, res) {
         LEFT JOIN log_5supplier 
             ON pabrik_timbangan.kodesupplier = log_5supplier.supplierid 
 
-        WHERE tanggal LIKE '${date}%'
-        AND kodebarang='400000003'
+        WHERE tanggal LIKE '${date}%' AND kodebarang='400000003' AND millcode='${code}'
 
         GROUP BY 
             DATE(tanggal),
@@ -161,37 +157,38 @@ controller.selectWeightDaily = async function (req, res) {
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectWeightWeekly = async function (req, res) {
     try {
         const requestData = req.body;
         const {
             language_POST: language,
             start_date_POST: startDate,
-            end_date_POST: endDate
+            end_date_POST: endDate,
+            code_POST: code,
         } = requestData;
 
         // const today = new Date().toISOString().split('T')[0];
@@ -206,34 +203,34 @@ controller.selectWeightWeekly = async function (req, res) {
 
         const mergedData = Object.values(
             [
-                ...selectWeightWeeklyIntiData.map(d => ({
+                ...selectWeightWeeklyIntiData.map((d) => ({
                     tanggal: d.tanggal,
                     inti: d.total_berat_bersih,
                     supplier: 0,
                     external: 0,
-                    total: 0
+                    total: 0,
                 })),
-                ...selectWeightweeklySupplierData.map(d => ({
+                ...selectWeightweeklySupplierData.map((d) => ({
                     tanggal: d.tanggal,
                     inti: 0,
                     supplier: d.total_berat_bersih,
                     external: 0,
-                    total: 0
+                    total: 0,
                 })),
-                ...selectWeightWeeklyExternalData.map(d => ({
+                ...selectWeightWeeklyExternalData.map((d) => ({
                     tanggal: d.tanggal,
                     inti: 0,
                     supplier: 0,
                     external: d.total_berat_bersih,
-                    total: 0
+                    total: 0,
                 })),
-                ...selectWeightWeeklyTotalData.map(d => ({
+                ...selectWeightWeeklyTotalData.map((d) => ({
                     tanggal: d.tanggal,
                     inti: 0,
                     supplier: 0,
                     external: 0,
-                    total: d.total_berat_bersih
-                }))
+                    total: d.total_berat_bersih,
+                })),
             ].reduce((acc, cur) => {
                 if (!acc[cur.tanggal]) {
                     acc[cur.tanggal] = {
@@ -241,7 +238,7 @@ controller.selectWeightWeekly = async function (req, res) {
                         inti: 0,
                         supplier: 0,
                         external: 0,
-                        total: 0
+                        total: 0,
                     };
                 }
 
@@ -251,20 +248,20 @@ controller.selectWeightWeekly = async function (req, res) {
                 acc[cur.tanggal].total += cur.total;
 
                 return acc;
-            }, {})
+            }, {}),
         );
 
-        if (!mergedData.find(d => d.tanggal === endDate)) {
+        if (!mergedData.find((d) => d.tanggal === endDate)) {
             mergedData.push({
                 tanggal: endDate,
                 inti: 0,
                 supplier: 0,
                 external: 0,
-                total: 0
+                total: 0,
             });
         }
-        const combinedData = mergedData.sort(
-            (a, b) => b.tanggal.localeCompare(a.tanggal)
+        const combinedData = mergedData.sort((a, b) =>
+            b.tanggal.localeCompare(a.tanggal),
         );
 
         // const combinedData = Object.values(
@@ -322,98 +319,97 @@ controller.selectWeightWeekly = async function (req, res) {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih           
             FROM pabrik_timbangan
-            WHERE intex = 1 AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003'
+            WHERE intex = 1 AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
         async function selectWeightweeklySupplier() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih           
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '50%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003'
+            WHERE intex = 0 AND nospb LIKE '50%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
         async function selectWeightWeeklyExternal() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih           
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '4%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003'
+            WHERE intex = 0 AND nospb LIKE '4%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
         async function selectWeightWeeklyTotal() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih           
             FROM pabrik_timbangan
-            WHERE tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003'
+            WHERE tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000003' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
-
 
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectWeightMonthly = async function (req, res) {
     try {
         const requestData = req.body;
         const {
             language_POST: language,
-            month_POST: month
+            month_POST: month,
+            code_POST: code,
         } = requestData;
-        const startMonth = `${month}-01`
-        const endMonth = `${month}-31`
+        const startMonth = `${month}-01`;
+        const endMonth = `${month}-31`;
 
+        const selectWeightMonthAllData = await selectWeightMonthAll();
 
-        const selectWeightMonthAllData = await selectWeightMonthAll()
+        const selectWeightMonthIntiData = await selectWeightMonthInti();
 
-        const selectWeightMonthIntiData = await selectWeightMonthInti()
+        const selectWeightMonthPlasmaData = await selectWeightMonthPlasma();
 
-        const selectWeightMonthPlasmaData = await selectWeightMonthPlasma()
-
-        const selectWeightMonthExternalData = await selectWeightMonthExternal()
+        const selectWeightMonthExternalData = await selectWeightMonthExternal();
 
         var data = {
             dataMonthAll: selectWeightMonthAllData,
             dataMonthInti: selectWeightMonthIntiData,
             dataMonthPlasma: selectWeightMonthPlasmaData,
             dataMonthExternal: selectWeightMonthExternalData,
-        }
+        };
         sendSuccessResponse(messages[language]?.accessSuccess, data);
 
         async function selectWeightMonthAll() {
@@ -421,40 +417,40 @@ controller.selectWeightMonthly = async function (req, res) {
             SELECT SUM(beratbersih) AS total_berat
             FROM pabrik_timbangan
             WHERE tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
-            AND kodebarang = '400000003';
+            AND kodebarang = '400000003' AND millcode='${code}';
             `);
-            return rowsTotal.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsTotal.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthInti() {
             const [rowsInti] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 1 AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
+            WHERE intex = 1 AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' AND millcode='${code}'
             `);
-            return rowsInti.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsInti.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthPlasma() {
             const [rowsPlasma] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
+            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' AND millcode='${code}'
             `);
-            return rowsPlasma.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsPlasma.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         async function selectWeightMonthExternal() {
             const [rowsExternal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59'
+            WHERE intex = 0 AND nospb LIKE '4%' AND kodebarang='400000003' AND  tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' AND millcode='${code}'
             `);
-            return rowsExternal.map(r => ({
-                total_berat: (r.total_berat ?? 0) / 1000
+            return rowsExternal.map((r) => ({
+                total_berat: (r.total_berat ?? 0) / 1000,
             }));
         }
         function sendSuccessResponse(message, data = []) {
@@ -462,94 +458,97 @@ controller.selectWeightMonthly = async function (req, res) {
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectDispatchCPOWeekly = async function (req, res) {
     try {
         const requestData = req.body;
         const {
             language_POST: language,
             start_date_POST: startDate,
-            end_date_POST: endDate
+            end_date_POST: endDate,
+            code_POST: code,
         } = requestData;
 
         const selectDispatchCPOWeeklyData = await selectDispatchCPOWeekly();
 
-        sendSuccessResponse(messages[language]?.accessSuccess, selectDispatchCPOWeeklyData);
+        sendSuccessResponse(
+            messages[language]?.accessSuccess,
+            selectDispatchCPOWeeklyData,
+        );
 
         async function selectDispatchCPOWeekly() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih, bps, moist, dirt, dobi          
             FROM pabrik_timbangan
-            WHERE wbcond = 'Normal' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000001'
+            WHERE wbcond = 'Normal' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59'  AND kodebarang='400000001' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
-
 
         function sendSuccessResponse(message, data = []) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectContractMonthly = async function (req, res) {
-
     try {
         const requestData = req.body;
         const {
             language_POST: language,
-            month_POST: month
+            month_POST: month,
+            code_POST: code,
         } = requestData;
-        const startMonth = `${month}-01`
-        const endMonth = `${month}-31`
+        const startMonth = `${month}-01`;
+        const endMonth = `${month}-31`;
 
         const selectContractData = await selectContract();
         sendSuccessResponse(messages[language]?.accessSuccess, selectContractData);
@@ -562,16 +561,16 @@ controller.selectContractMonthly = async function (req, res) {
                     MAX(pmn_suratperintahpengiriman.qty) AS qty, 
                     COALESCE(MAX(pabrik_timbangan.total_berat),0) AS total_berat_bersih
                 FROM pmn_suratperintahpengiriman 
-                LEFT JOIN (
+                INNER JOIN (
                     SELECT nodo, SUM(beratbersih) AS total_berat 
                     FROM pabrik_timbangan 
-                    WHERE wbcond = 'Normal'
+                    WHERE wbcond = 'Normal' AND millcode='${code}'
                     GROUP BY nodo
                 ) pabrik_timbangan 
                     ON pmn_suratperintahpengiriman.nodo = pabrik_timbangan.nodo
                 LEFT JOIN pmn_4customer 
                     ON pmn_suratperintahpengiriman.supplierid = pmn_4customer.kodecustomer
-                WHERE pmn_suratperintahpengiriman.kodebarang IN ('400000001','400000002')
+                WHERE pmn_suratperintahpengiriman.kodebarang IN ('400000001','400000002') 
                 GROUP BY 
                     pmn_4customer.namacustomer,
                     pmn_suratperintahpengiriman.nodo,
@@ -587,52 +586,53 @@ controller.selectContractMonthly = async function (req, res) {
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectProductionMillDaily = async function (req, res) {
     try {
         const requestData = req.body;
         const {
             language_POST: language,
-            date_POST: date
+            date_POST: date,
+            code_POST: code,
         } = requestData;
 
         const d = new Date(date);
         d.setDate(d.getDate() - 1);
 
-        const resultStock = d.toISOString().split('T')[0];
+        const resultStock = d.toISOString().split("T")[0];
 
-        const selectMasukTodayAllData = await selectMasukTodayAll()
-        const selectStockTBSRestanData = await selectStockTBSRestan()
-        const selectProdutionMillData = await selectProdutionMill()
-        const selectStockCPOData = await selectStockCPO()
-        const selectStockPKData = await selectStockPK()
-        const selectStockCPOTodayData = await selectStockCPOToday()
-        const selectStockPKTodayData = await selectStockPKToday()
-        const selectDispatchCPOData = await selectDispatchCPO()
-        const selectDispatchPKData = await selectDispatchPK()
+        const selectMasukTodayAllData = await selectMasukTodayAll();
+        const selectStockTBSRestanData = await selectStockTBSRestan();
+        const selectProdutionMillData = await selectProdutionMill();
+        const selectStockCPOData = await selectStockCPO();
+        const selectStockPKData = await selectStockPK();
+        const selectStockCPOTodayData = await selectStockCPOToday();
+        const selectStockPKTodayData = await selectStockPKToday();
+        const selectDispatchCPOData = await selectDispatchCPO();
+        const selectDispatchPKData = await selectDispatchPK();
         var data = {
             dataTBSRestan: selectStockTBSRestanData,
             dataTBSToday: selectMasukTodayAllData,
@@ -643,7 +643,7 @@ controller.selectProductionMillDaily = async function (req, res) {
             dataStockPKToday: selectStockPKTodayData,
             dataDispatchCPO: selectDispatchCPOData,
             dataDispatchPK: selectDispatchPKData,
-        }
+        };
 
         sendSuccessResponse(messages[language]?.accessSuccess, data);
 
@@ -651,54 +651,63 @@ controller.selectProductionMillDaily = async function (req, res) {
             const [rowsTotal] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE tanggal LIKE '${date}%' AND kodebarang='400000003'
+            WHERE tanggal LIKE '${date}%' AND kodebarang='400000003' AND millcode='${code}'
             `);
-            return rowsTotal
+            return rowsTotal;
         }
         async function selectStockTBSRestan() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT sisahariininetto
             FROM pabrik_produksi
-            WHERE tanggal LIKE '${resultStock}%'
+            WHERE tanggal LIKE '${resultStock}%' AND kodeorg='${code}'
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
         async function selectProdutionMill() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT sisatbskemarinnetto, tbsmasuknetto, tbsdiolahnetto, oer, oerpk, ffa, kadarair, kadarkotoran, kadarairpk, kadarkotoranpk
             FROM pabrik_produksi
-            WHERE tanggal LIKE '${date}%'
+            WHERE tanggal LIKE '${date}%' AND kodeorg='${code}'
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
         async function selectStockCPO() {
             const [rowsStock] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  like  'ST%' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
+            WHERE kodetangki  like  'ST%' AND kodeorg= '${code}' AND tanggal = '${resultStock}'
             `);
             const total = rowsStock.reduce((sum, item) => {
                 return sum + Number(item.kuantitas);
             }, 0);
 
             return {
-                kuantitas: total
+                kuantitas: total,
             };
         }
         async function selectStockPK() {
+            // const codeTangki = "";
+            // if ((code = "BAFM")) {
+            //     codeTangki = "KB02";
+            // } else if ((code = "MASM")) {
+            //     codeTangki = "KB01";
+            // }
             const [rowsStock] = await koneksi.query(`
             SELECT kernelquantity,lantai
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  =  'KB02' AND kodeorg= 'BAFM' AND tanggal = '${resultStock}'
+            WHERE kodetangki  =  'KB02' AND tanggal = '${resultStock}' AND kodeorg= '${code}'
             `);
-            const total = rowsStock.reduce((acc, item) => {
-                acc.kernelquantity += Number(item.kernelquantity || 0);
-                acc.lantai += Number(item.lantai || 0);
-                return acc;
-            }, {
-                kernelquantity: 0,
-                lantai: 0
-            });
+            const total = rowsStock.reduce(
+                (acc, item) => {
+                    acc.kernelquantity += Number(item.kernelquantity || 0);
+                    acc.lantai += Number(item.lantai || 0);
+                    return acc;
+                },
+                {
+                    kernelquantity: 0,
+                    lantai: 0,
+                },
+            );
             // const totalStockPK = total.kernelquantity + total.lantai;
             const totalStockPK = total.kernelquantity;
             // const total = rowsStock.reduce((sum, item) => {
@@ -706,63 +715,66 @@ controller.selectProductionMillDaily = async function (req, res) {
             // }, 0);
 
             return {
-                kuantitas: totalStockPK
+                kuantitas: totalStockPK,
             };
         }
         async function selectStockCPOToday() {
             const [rowsStockToday] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  like  'ST%' AND kodeorg= 'BAFM' AND tanggal = '${date}'
+            WHERE kodetangki  like  'ST%' AND kodeorg= '${code}' AND tanggal = '${date}'
             `);
             const total = rowsStockToday.reduce((sum, item) => {
                 return sum + Number(item.kuantitas);
             }, 0);
 
             return {
-                kuantitas: total
+                kuantitas: total,
             };
         }
         async function selectStockPKToday() {
             const [rowsStockToday] = await koneksi.query(`
             SELECT kernelquantity,lantai
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  =  'KB02' AND kodeorg= 'BAFM' AND tanggal = '${date}'
+            WHERE kodetangki  =  'KB02' AND kodeorg= '${code}' AND tanggal = '${date}'
             `);
-            const total = rowsStockToday.reduce((acc, item) => {
-                acc.kernelquantity += Number(item.kernelquantity || 0);
-                acc.lantai += Number(item.lantai || 0);
-                return acc;
-            }, {
-                kernelquantity: 0,
-                lantai: 0
-            });
+            const total = rowsStockToday.reduce(
+                (acc, item) => {
+                    acc.kernelquantity += Number(item.kernelquantity || 0);
+                    acc.lantai += Number(item.lantai || 0);
+                    return acc;
+                },
+                {
+                    kernelquantity: 0,
+                    lantai: 0,
+                },
+            );
             // const totalStockPK = total.kernelquantity + total.lantai;
             const totalStockPK = total.kernelquantity;
 
             return {
-                kuantitas: totalStockPK
+                kuantitas: totalStockPK,
             };
         }
         async function selectDispatchCPO() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih         
             FROM pabrik_timbangan
-            WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000001'
+            WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000001' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
         async function selectDispatchPK() {
             const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih         
             FROM pabrik_timbangan
-            WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000002'
+            WHERE wbcond = 'Normal' AND tanggal LIKE '${date}%'  AND kodebarang='400000002' AND millcode='${code}'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
-            return rowsSupplier
+            return rowsSupplier;
         }
 
         function sendSuccessResponse(message, data = []) {
@@ -770,48 +782,51 @@ controller.selectProductionMillDaily = async function (req, res) {
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectCPOContractMonthly = async function (req, res) {
-
     try {
         const requestData = req.body;
         const {
             language_POST: language,
-            month_POST: month
+            month_POST: month,
+            code_POST: code,
         } = requestData;
 
         const selectCPOContractData = await selectCPOContract();
 
-        sendSuccessResponse(messages[language]?.accessSuccess, selectCPOContractData);
+        sendSuccessResponse(
+            messages[language]?.accessSuccess,
+            selectCPOContractData,
+        );
 
         async function selectCPOContract() {
             const [rowsContract] = await koneksi.query(`
                 SELECT DISTINCT pmn_kontrakjual.pembayaran, pmn_kontrakjual.koderekanan, pmn_kontrakjual.tanggalselesai, pmn_kontrakjual.nokontrak, pmn_kontrakjual.hargasatuan, pmn_kontrakjual.kuantitaskontrak FROM pmn_kontrakjual 
                 LEFT JOIN pmn_suratperintahpengiriman ON pmn_kontrakjual.nokontrak = pmn_suratperintahpengiriman.nokontrak
-                WHERE  pmn_kontrakjual.kodebarang = '400000001'
+                WHERE  pmn_kontrakjual.kodebarang = '400000001' AND millcode='${code}'
                 ORDER BY pmn_kontrakjual.tanggalkontrak DESC, pmn_suratperintahpengiriman.nodo DESC;
             `);
             return rowsContract;
@@ -821,49 +836,48 @@ controller.selectCPOContractMonthly = async function (req, res) {
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 controller.selectPKContractMonthly = async function (req, res) {
-
     try {
         const requestData = req.body;
-        const {
-            language_POST: language,
-            month_POST: month
-        } = requestData;
+        const { language_POST: language, month_POST: month, code_POST: code } = requestData;
 
         const selectCPOContractData = await selectCPOContract();
 
-        sendSuccessResponse(messages[language]?.accessSuccess, selectCPOContractData);
+        sendSuccessResponse(
+            messages[language]?.accessSuccess,
+            selectCPOContractData,
+        );
 
         async function selectCPOContract() {
             const [rowsContract] = await koneksi.query(`
                 SELECT DISTINCT pmn_kontrakjual.pembayaran, pmn_kontrakjual.koderekanan, pmn_kontrakjual.tanggalselesai, pmn_kontrakjual.nokontrak, pmn_kontrakjual.hargasatuan, pmn_kontrakjual.kuantitaskontrak FROM pmn_kontrakjual 
                 LEFT JOIN pmn_suratperintahpengiriman ON pmn_kontrakjual.nokontrak = pmn_suratperintahpengiriman.nokontrak
-                WHERE pmn_kontrakjual.kodebarang = '400000002'
-               ORDER BY pmn_kontrakjual.tanggalkontrak DESC, pmn_suratperintahpengiriman.nodo DESC;
+                WHERE pmn_kontrakjual.kodebarang = '400000002' AND millcode='${code}'
+                ORDER BY pmn_kontrakjual.tanggalkontrak DESC, pmn_suratperintahpengiriman.nodo DESC;
             `);
             return rowsContract;
         }
@@ -872,28 +886,28 @@ controller.selectPKContractMonthly = async function (req, res) {
             res.status(200).json({
                 access: "success",
                 // message: message,
-                data: data
+                data: data,
             });
         }
         function sendFailedResponse(message) {
             if (res.headersSent) return;
             res.status(200).json({
                 access: "failed",
-                message: message
+                message: message,
             });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+        if (error.name === "SequelizeUniqueConstraintError") {
             res.status(200).json({
                 access: "failed",
                 message: messages[language]?.failedData,
-                data: []
+                data: [],
             });
         } else {
             res.status(404).json({
-                message: error.message
+                message: error.message,
             });
         }
     }
-}
+};
 module.exports = controller;

@@ -8,5 +8,4 @@ router.get("/", controller.language.selectLanguage);
 // router.post("/insert", controller.karyawan.insertKaryawan);
 // router.post("/selectbynik", controller.karyawan.selectKaryawanByNIK);
 
-
 module.exports = router;
