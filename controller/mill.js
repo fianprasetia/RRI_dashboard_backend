@@ -79,7 +79,7 @@ controller.selectWeight = async function (req, res) {
       const [rowsPlasma] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '50%' AND kodebarang='400000003' AND millcode='${mill}' AND tanggal LIKE '${date}%'
+            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND millcode='${mill}' AND tanggal LIKE '${date}%'
             `);
       return rowsPlasma.map((r) => ({
         total_berat: (r.total_berat ?? 0) / 1000,
@@ -111,7 +111,7 @@ controller.selectWeight = async function (req, res) {
             SELECT namasupplier, DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih            
             FROM pabrik_timbangan
             LEFT JOIN log_5supplier ON pabrik_timbangan.kodesupplier = log_5supplier.supplierid 
-            WHERE intex = 0 AND tanggal LIKE '${date}%' AND nospb LIKE '50%' AND millcode='${mill}' AND kodebarang='400000003'
+            WHERE intex = 0 AND tanggal LIKE '${date}%' AND nospb LIKE '5%' AND millcode='${mill}' AND kodebarang='400000003'
             GROUP BY kodesupplier, DATE(tanggal)
             ORDER BY tanggal DESC, kodesupplier
             `);
@@ -282,7 +282,7 @@ controller.selectWeightWeekly = async function (req, res) {
       const [rowsSupplier] = await koneksi.query(`
             SELECT DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih           
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '50%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59' AND millcode='${mill}' AND kodebarang='400000003'
+            WHERE intex = 0 AND nospb LIKE '5%' AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59' AND millcode='${mill}' AND kodebarang='400000003'
             GROUP BY DATE(tanggal)
             ORDER BY tanggal DESC
             `);
@@ -324,7 +324,7 @@ controller.selectWeightWeekly = async function (req, res) {
             SELECT namasupplier, DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih            
             FROM pabrik_timbangan
             LEFT JOIN log_5supplier ON pabrik_timbangan.kodesupplier = log_5supplier.supplierid 
-            WHERE intex = 0 AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59' AND nospb LIKE '50%' AND millcode='${mill}' AND kodebarang='400000003'
+            WHERE intex = 0 AND tanggal BETWEEN '${startDate} 00:00:00' AND '${endDate} 23:59:59' AND nospb LIKE '5%' AND millcode='${mill}' AND kodebarang='400000003'
             GROUP BY kodesupplier, DATE(tanggal)
             ORDER BY tanggal DESC, kodesupplier
             `);
@@ -453,7 +453,7 @@ controller.selectWeightmonthly = async function (req, res) {
             SELECT namasupplier, DATE(tanggal) AS tanggal, SUM(beratbersih) AS total_berat_bersih            
             FROM pabrik_timbangan
             LEFT JOIN log_5supplier ON pabrik_timbangan.kodesupplier = log_5supplier.supplierid 
-            WHERE intex = 0 AND nospb LIKE '50%' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' AND millcode='${mill}' AND kodebarang='400000003'
+            WHERE intex = 0 AND nospb LIKE '5%' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' AND millcode='${mill}' AND kodebarang='400000003'
             GROUP BY kodesupplier, DATE(tanggal)
             ORDER BY tanggal DESC, kodesupplier
             `);
@@ -483,7 +483,7 @@ controller.selectWeightmonthly = async function (req, res) {
       const [rowsPlasma] = await koneksi.query(`
             SELECT SUM(beratbersih) AS total_berat               
             FROM pabrik_timbangan
-            WHERE intex = 0 AND nospb LIKE '50%' AND kodebarang='400000003' AND millcode='${mill}' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' 
+            WHERE intex = 0 AND nospb LIKE '5%' AND kodebarang='400000003' AND millcode='${mill}' AND tanggal BETWEEN '${startMonth} 00:00:00' AND '${endMonth} 23:59:59' 
             `);
       return rowsPlasma.map((r) => ({
         total_berat: (r.total_berat ?? 0) / 1000,
