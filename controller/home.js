@@ -672,10 +672,18 @@ controller.selectProductionMillDaily = async function (req, res) {
             return rowsSupplier;
         }
         async function selectStockCPO() {
+            let codeTangki = "";
+
+            if (code === "BAFM") {
+                codeTangki = "ST%";
+            } else if (code === "MASM") {
+                codeTangki = "OST%";
+            }
+
             const [rowsStock] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  like  'ST%' AND kodeorg= '${code}' AND tanggal = '${resultStock}'
+            WHERE kodetangki  like  '${codeTangki}' AND kodeorg= '${code}' AND tanggal = '${resultStock}'
             `);
             const total = rowsStock.reduce((sum, item) => {
                 return sum + Number(item.kuantitas);
@@ -686,12 +694,14 @@ controller.selectProductionMillDaily = async function (req, res) {
             };
         }
         async function selectStockPK() {
-            // const codeTangki = "";
-            // if ((code = "BAFM")) {
-            //     codeTangki = "KB02";
-            // } else if ((code = "MASM")) {
-            //     codeTangki = "KB01";
-            // }
+            let codeTangki = "";
+
+            if (code === "BAFM") {
+                codeTangki = "KB02";
+            } else if (code === "MASM") {
+                codeTangki = "OST%";
+            }
+
             const [rowsStock] = await koneksi.query(`
             SELECT kernelquantity,lantai
             FROM pabrik_masukkeluartangki
