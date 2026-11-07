@@ -729,10 +729,18 @@ controller.selectProductionMillDaily = async function (req, res) {
             };
         }
         async function selectStockCPOToday() {
+                let codeTangki = "";
+
+            if (code === "BAFM") {
+                codeTangki = "ST%";
+            } else if (code === "MASM") {
+                codeTangki = "OST%";
+            }
+
             const [rowsStockToday] = await koneksi.query(`
             SELECT kuantitas
             FROM pabrik_masukkeluartangki
-            WHERE kodetangki  like  'ST%' AND kodeorg= '${code}' AND tanggal = '${date}'
+            WHERE kodetangki  like  '${codeTangki}' AND kodeorg= '${code}' AND tanggal = '${date}'
             `);
             const total = rowsStockToday.reduce((sum, item) => {
                 return sum + Number(item.kuantitas);
